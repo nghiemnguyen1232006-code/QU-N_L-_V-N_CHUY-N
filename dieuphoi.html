@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>FASTGO - Điều phối</title>
+
+<!-- ICON -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- LEAFLET -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- ROUTING -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"/>
+<script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+<style>
+body{margin:0;font-family:Arial}
+
+/* HEADER */
+.header{
+    height:60px;
+    background:#5b668a;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+
+/* LAYOUT */
+.container{display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{
+    width:230px;
+    background:#5b668a;
+    color:white;
+}
+.menu-item{
+    padding:15px;
+    border-bottom:1px solid black;
+    cursor:pointer;
+}
+.menu-item:hover,.active{
+    background:#7a86b0;
+}
+
+/* CONTENT */
+.content{
+    flex:1;
+    padding:30px;
+    background:#f5f7fb;
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+th{
+    background:#9aa4c7;
+    padding:12px;
+}
+td{
+    border:1px solid #ccc;
+    padding:12px;
+    text-align:center;
+}
+
+/* MAP */
+#map{
+    height:400px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+/* FORM */
+select,button{
+    padding:8px;
+    margin:5px;
+}
+
+/* TIMELINE */
+.timeline{
+    margin-left:40px;
+}
+.step{
+    margin:15px 0;
+}
+.step{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px;
+    border-radius:8px;
+    background:#eee;
+}
+
+/* đã hoàn thành */
+.done{
+    background:#d4edda;
+    color:green;
+    font-weight:bold;
+}
+
+/* icon */
+.step i{
+    font-size:18px;
+}
+.active-step{
+    background:#cfd7f5;
+    padding:5px 10px;
+    border-radius:20px;
+}
+.header i{
+    font-size:24px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div style="display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-truck-fast"></i>
+        <b>FASTGO</b>
+    </div>
+    <div>Điều phối</div>
+</div>
+<div class="container">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="menu-item active" onclick="show('list',this)">Danh sách</div>
+    <div class="menu-item" onclick="show('assign',this)">Phân công</div>
+    <div class="menu-item" onclick="show('route',this)">Tuyến đường</div>
+    <div class="menu-item" onclick="show('progress',this)">Tiến trình</div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- DANH SÁCH -->
+<div id="list" class="card">
+    <h2>Danh sách đơn hàng</h2>
+    <div style="margin:10px 0;text-align:right;">
+    <input type="text" id="searchList" placeholder="Tìm mã đơn (VD: DH001)" onkeyup="filterOrders()">
+</div>
+   <table id="orderTable">
+    <tr>
+        <th>Mã đơn</th>
+        <th>Tài xế</th>
+        <th>Tên hàng</th>
+        <th>Tải trọng</th>
+    </tr>
+
+    <tr>
+        <td>DH001</td>
+        <td>Tài xế A</td>
+        <td>Điện tử</td>
+        <td>5kg</td>
+    </tr>
+
+    <tr>
+        <td>DH002</td>
+        <td>Tài xế B</td>
+        <td>Quần áo</td>
+        <td>10kg</td>
+    </tr>
+
+    <tr>
+        <td>DH003</td>
+        <td>Tài xế C</td>
+        <td>Gia dụng</td>
+        <td>20kg</td>
+    </tr>
+</table>
+</div>
+
+<!-- PHÂN CÔNG -->
+<div id="assign" class="card" style="display:none">
+    <h2>Phân công</h2>
+
+    <select id="order">
+        <option>DH001</option>
+        <option>DH002</option>
+        <option>DH003</option>
+    </select>
+
+    <select id="driver">
+        <option>Tài xế A</option>
+        <option>Tài xế B</option>
+        <option>Tài xế C</option>
+    </select>
+
+    <button onclick="assign()">Phân công</button>
+
+    <table id="assignTable">
+        <tr><th>Mã đơn</th><th>Tài xế</th></tr>
+    </table>
+</div>
+
+<!-- TUYẾN ĐƯỜNG -->
+<div id="route" class="card" style="display:none">
+    <h2>Tối ưu tuyến đường</h2>
+    <div style="text-align:center;margin-bottom:15px;">
+    <input type="text" id="routeOrder" placeholder="Nhập mã đơn (VD: DH001)">
+    <button onclick="searchRoute()">Tìm đơn</button>
+</div>
+
+<div id="routeInfo" style="text-align:center;font-weight:bold;margin-bottom:10px;"></div>
+    <div id="map"></div>
+</div>
+
+<!-- TIẾN TRÌNH -->
+
+
+<div id="searchResult" style="text-align:center;font-weight:bold;margin-bottom:15px;"></div>
+<div id="progress" class="card" style="display:none">
+
+<h2 style="text-align:center">
+    <i class="fa fa-route"></i> Theo dõi tiến trình vận chuyển
+</h2>
+<div style="text-align:center;margin-bottom:15px;">
+    <input type="text" id="searchOrder" placeholder="Nhập mã đơn (VD: DH001)">
+    <button onclick="searchOrder()">Tra cứu</button>
+</div>
+
+<div id="searchResult" style="text-align:center;font-weight:bold;margin-bottom:15px;"></div>
+
+<div id="searchResult" style="text-align:center;font-weight:bold;margin-bottom:15px;"></div>
+
+<div class="timeline">
+
+    <div class="step done">
+        <i class="fa fa-file-circle-check"></i> Tiếp nhận đơn
+    </div>
+
+    <div class="step done">
+        <i class="fa fa-warehouse"></i> Nhận hàng từ kho
+    </div>
+
+    <div class="step active-step">
+        <i class="fa fa-map"></i> Lập tuyến đường
+    </div>
+
+    <div class="step">
+        <i class="fa fa-truck"></i> Đang vận chuyển
+    </div>
+
+    <div class="step">
+        <i class="fa fa-location-dot"></i> Giao hàng
+    </div>
+
+    <div class="step">
+        <i class="fa fa-circle-check"></i> Hoàn tất
+    </div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+/* chuyển tab */
+function show(id, el){
+
+    // Ẩn tất cả tab
+    document.querySelectorAll(".card").forEach(d => {
+        d.style.display = "none";
+    });
+
+    // Hiện tab được chọn
+    document.getElementById(id).style.display = "block";
+
+    // Active menu
+    document.querySelectorAll(".menu-item").forEach(i => i.classList.remove("active"));
+    el.classList.add("active");
+
+    // ⭐ RESET khi rời tab tiến trình
+    if(id !== "progress"){
+        resetTimeline();
+    }
+
+    // Load map nếu cần
+    if(id === "route"){
+        loadMap();
+    }
+}
+function filterOrders(){
+    let input = document.getElementById("searchList").value.toUpperCase();
+    let table = document.getElementById("orderTable");
+    let rows = table.getElementsByTagName("tr");
+
+    for(let i = 1; i < rows.length; i++){
+        let td = rows[i].getElementsByTagName("td")[0];
+
+        if(td){
+            let text = td.textContent || td.innerText;
+
+            if(text.toUpperCase().indexOf(input) > -1){
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+}
+function resetTimeline(){
+    document.querySelectorAll(".timeline .step").forEach(el => {
+        el.classList.remove("done", "active-step");
+    });
+
+    document.getElementById("searchOrder").value = "";
+    document.getElementById("searchResult").innerHTML = "";
+}
+
+/* phân công */
+function assign(){
+    let order=document.getElementById("order").value;
+    let driver=document.getElementById("driver").value;
+
+    let row=`<tr><td>${order}</td><td>${driver}</td></tr>`;
+    document.getElementById("assignTable").innerHTML+=row;
+}
+
+let map;
+let marker;
+let mapLoaded=false;
+
+function loadMap(){
+    if(mapLoaded) return;
+
+    map = L.map('map').setView([16.0471,108.2062],13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        attribution:'© OpenStreetMap'
+    }).addTo(map);
+
+    marker = L.marker([16.0471,108.2062]).addTo(map)
+        .bindPopup("Vị trí đơn hàng");
+
+    mapLoaded=true;
+}
+
+/* DI CHUYỂN MARKER THEO ĐƠN */
+function moveMap(lat,lng){
+    if(!mapLoaded) loadMap();
+
+    map.setView([lat,lng],14);
+
+    marker.setLatLng([lat,lng])
+        .bindPopup("Đơn hàng đang ở đây")
+        .openPopup();
+}
+const routeData = {
+    "DH001": {
+        status: "Đang vận chuyển",
+        location: "Kho Quảng Ngãi → Cầu Trà Khúc",
+        lat: 16.0471,
+        lng: 108.2062
+    },
+    "DH002": {
+        status: "Đang ở kho",
+        location: "Kho trung tâm Quảng Ngãi",
+        lat: 16.0600,
+        lng: 108.2100
+    },
+    "DH003": {
+        status: "Giao hàng hoàn tất",
+        location: "Đã giao thành công",
+        lat: 16.0750,
+        lng: 108.2300
+    }
+};
+function searchRoute(){
+    let code = document.getElementById("routeOrder").value.trim().toUpperCase();
+    let data = routeData[code];
+
+    let info = document.getElementById("routeInfo");
+
+    if(!data){
+        info.innerHTML = "❌ Không tìm thấy đơn hàng";
+        return;
+    }
+
+    info.innerHTML = `
+        📦 <b>${code}</b><br>
+        🚚 ${data.status}<br>
+        📍 Vị trí: ${data.location}
+    `;
+
+    moveMap(data.lat, data.lng);
+}
+const orders = {
+    "DH001": 1,
+    "DH002": 3,
+    "DH003": 5
+};
+
+const steps = [
+    "Tiếp nhận đơn",
+    "Nhận hàng từ kho",
+    "Lập tuyến đường",
+    "Đang vận chuyển",
+    "Giao hàng",
+    "Hoàn tất"
+];
+
+/* TRA CỨU ĐƠN HÀNG */
+function searchOrder(){
+    let code = document.getElementById("searchOrder").value.trim().toUpperCase();
+    let index = orders[code];
+
+    let result = document.getElementById("searchResult");
+
+    if(index === undefined){
+        result.innerHTML = "❌ Không tìm thấy đơn hàng";
+        renderTimeline(-1);
+        return;
+    }
+
+    result.innerHTML = `
+        📦 <b>${code}</b><br>
+        🚚 Trạng thái: <span style="color:#2c3e50">${steps[index]}</span>
+    `;
+
+    renderTimeline(index);
+}
+
+/* HIỂN THỊ TIMELINE */
+function renderTimeline(active){
+    const list = document.querySelectorAll(".timeline .step");
+
+    list.forEach((el, i) => {
+        el.classList.remove("done", "active-step");
+
+        if(active === -1){
+            return;
+        }
+
+        if(i < active){
+            el.classList.add("done");
+        } 
+        else if(i === active){
+            el.classList.add("active-step");
+        }
+    });
+}
+</script>
+
+</body>
+</html>
