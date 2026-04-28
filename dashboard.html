@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>FASTGO Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#eef1f6;
+}
+
+/* HEADER */
+.header{
+    height:60px;
+    background:linear-gradient(90deg,#042051,#1f4fa3);
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+}
+
+/* LAYOUT */
+.container{
+    display:flex;
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:230px;
+    background: #042051;
+    color:white;
+    height:100vh;
+}
+
+.menu-item{
+    padding:15px;
+    border-bottom:1px solid rgba(255,255,255,0.2);
+    cursor:pointer;
+}
+
+.menu-item:hover{
+    background:#1f4fa3;
+}
+.menu-item i{
+    margin-right:10px;
+}
+
+/* CONTENT */
+.content{
+    flex:1;
+    padding:30px;
+}
+
+/* CARD */
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.2);
+}
+
+/* FORM */
+input, select{
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border-radius:6px;
+    border:1px solid #ccc;
+}
+
+/* BUTTON */
+.btn{
+    width:100%;
+    padding:12px;
+    background:#1f4fa3;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#1f4fa3;
+    color:white;
+    padding:12px;
+}
+
+td{
+    padding:12px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+tr:hover{
+    background:#f5f7ff;
+}
+
+/* STATUS */
+.status{
+    padding:5px 10px;
+    border-radius:6px;
+    color:white;
+}
+.waiting{background:gray;}
+.assigned{background:blue;}
+.done{background:green;}
+.cancel{background:red;}
+
+/* SEARCH */
+.search{
+    position:relative;
+}
+.search input{
+    padding:10px 10px 10px 35px;
+    border-radius:20px;
+}
+.search span{
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+}
+.search i{
+    position:absolute;
+    left:10px;
+    top:50%;
+    transform:translateY(-50%);
+    color:#888;
+}
+.logo-box{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+/* ICON XE */
+.logo-box i{
+    font-size:28px;
+    color:#ffffff;
+}
+
+/* CHỮ FASTGO */
+.logo-text{
+    font-size:20px;
+    font-weight:bold;
+    color:white;
+}
+
+/* SLOGAN */
+.slogan{
+    font-size:12px;
+    font-weight:normal;
+    color:#dcdcdc;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="logo-box">
+        <i class="fa-solid fa-truck-fast"></i>
+        <div class="logo-text">
+            FASTGO
+            <div class="slogan">Nhanh chóng - An toàn - Tiết kiệm</div>
+        </div>
+    </div>
+
+    <div onclick="logout()" style="cursor:pointer;">
+        <i class="fa-solid fa-user"></i> Đăng xuất
+    </div>
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+
+    <div class="menu-item" onclick="showContent('info')">
+        <i class="fa fa-user"></i> Thông tin cá nhân
+    </div>
+
+    <div class="menu-item" onclick="showContent('create')">
+        <i class="fa fa-plus-circle"></i> Tạo đơn vận chuyển
+    </div>
+
+    <div class="menu-item" onclick="showContent('track')">
+        <i class="fa fa-truck"></i> Theo dõi đơn hàng
+    </div>
+
+    <div class="menu-item" onclick="showContent('cost')">
+        <i class="fa fa-money-bill"></i> Chi phí vận chuyển
+    </div>
+
+</div>
+
+<div class="content" id="content"></div>
+
+</div>
+
+<script>
+
+/* LOGIN CHECK */
+if(localStorage.getItem("isLogin")!=="true"){
+    window.location.href="Dangnhap.html";
+}
+
+/* DATA */
+let orders = [
+    {id:"DH001", name:"Hàng điện tử", weight:5, vehicle:"Xe máy", km:10, cost:50000, sender:"A", receiver:"B", status:"waiting"},
+    {id:"DH002", name:"Quần áo", weight:10, vehicle:"Xe tải nhỏ", km:20, cost:80000, sender:"C", receiver:"D", status:"assigned"},
+    {id:"DH003", name:"Đồ gia dụng", weight:20, vehicle:"Xe tải", km:50, cost:150000, sender:"E", receiver:"F", status:"done"},
+    {id:"DH004", name:"Thực phẩm", weight:15, vehicle:"Xe tải", km:30, cost:90000, sender:"G", receiver:"H", status:"cancel"}
+];
+
+/* SHOW CONTENT */
+function showContent(type){
+    let content = document.getElementById("content");
+
+    /* INFO */
+    if(type==="info"){
+        content.innerHTML = `
+        <div class="card">
+            <h2>Thông tin cá nhân</h2>
+            <p>Họ tên: Nguyễn Văn A</p>
+            <p>Ngày sinh: 01/01/2003</p>
+            <p>Giới tính: Nam</p>
+            <p>SĐT: 0123456789</p>
+            <p>CCCD: 123456789</p>
+            <p>Quốc tịch: Việt Nam</p>
+            <p>Dân tộc: Kinh</p>
+            <p>Địa chỉ: Xã Tịnh Ấn Tây, Sơn Tịnh, Quảng Ngãi</p>
+        </div>`;
+    }
+
+    /* CREATE */
+    if(type==="create"){
+        content.innerHTML = `
+        <div class="card">
+            <h2 style="text-align:center">🚚 Tạo đơn vận chuyển</h2>
+
+            <div style="display:flex; gap:20px;">
+                <div style="flex:1;">
+                    <h3>Người gửi</h3>
+                    <input placeholder="Họ tên">
+                    <input placeholder="SĐT">
+                    <input placeholder="Địa chỉ">
+                </div>
+
+                <div style="flex:1;">
+                    <h3>Người nhận</h3>
+                    <input placeholder="Họ tên">
+                    <input placeholder="SĐT">
+                    <input placeholder="Địa chỉ">
+                </div>
+            </div>
+
+            <h3>Hàng hóa</h3>
+            <input placeholder="Tên hàng">
+
+            <div style="display:flex; gap:10px;">
+                <input placeholder="Kg">
+                <input placeholder="Km">
+            </div>
+
+            <select>
+                <option>Xe máy</option>
+                <option>Xe tải nhỏ</option>
+                <option>Xe tải</option>
+            </select>
+
+            <button class="btn">Tạo đơn</button>
+        </div>`;
+    }
+
+    /* TRACK */
+    if(type==="track"){
+        let rows="";
+        let map={
+            waiting:"Chờ xác nhận",
+            assigned:"Đã phân công",
+            done:"Đã giao",
+            cancel:"Đã hủy"
+        };
+
+        orders.forEach(o=>{
+            rows+=`
+            <tr>
+                <td>${o.id}</td>
+                <td>${o.sender}</td>
+                <td>${o.receiver}</td>
+                <td class="status ${o.status}">${map[o.status]}</td>
+            </tr>`;
+        });
+
+        content.innerHTML = `
+        <div class="card">
+            <h2>Theo dõi đơn hàng</h2>
+            <table>
+                <tr>
+                    <th>Mã</th>
+                    <th>Người gửi</th>
+                    <th>Người nhận</th>
+                    <th>Trạng thái</th>
+                </tr>
+                ${rows}
+            </table>
+        </div>`;
+    }
+
+    /* COST */
+    if(type==="cost"){
+        let rows="";
+        orders.forEach(o=>{
+            rows+=`
+            <tr>
+                <td>${o.id}</td>
+                <td>${o.name}</td>
+                <td>${o.weight} kg</td>
+                <td>${o.vehicle}</td>
+                <td>${o.km} km</td>
+                <td style="color:green;">${o.cost.toLocaleString()} VNĐ</td>
+            </tr>`;
+        });
+
+        content.innerHTML = `
+        <div class="card">
+
+            <h2>💰 Chi phí vận chuyển</h2>
+            <p>Danh sách chi phí các đơn hàng</p>
+
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+               <div class="search">
+                    <i class="fa fa-search"></i>
+                    <input id="searchBox" placeholder="Tìm mã đơn..." onkeyup="filterOrders()">
+               </div>
+
+                <div style="background:#eef3ff; padding:10px; border-radius:10px;">
+                    Tổng đơn: <b>${orders.length}</b>
+                </div>
+            </div>
+
+            <table id="orderTable">
+                <tr>
+                    <th>Mã đơn</th>
+                    <th>Tên hàng</th>
+                    <th>Tải trọng</th>
+                    <th>Loại xe</th>
+                    <th>Km</th>
+                    <th>Chi phí</th>
+                </tr>
+                ${rows}
+            </table>
+
+        </div>`;
+    }
+}
+
+/* SEARCH */
+function filterOrders(){
+    let input = document.getElementById("searchBox").value.toUpperCase();
+    let tr = document.getElementById("orderTable").getElementsByTagName("tr");
+
+    for(let i=1;i<tr.length;i++){
+        let td = tr[i].getElementsByTagName("td")[0];
+        tr[i].style.display = td.innerText.toUpperCase().includes(input) ? "" : "none";
+    }
+}
+
+/* LOGOUT */
+function logout(){
+    localStorage.removeItem("isLogin");
+    window.location.href="Dangnhap.html";
+}
+
+/* LOAD */
+showContent("info");
+
+</script>
+
+</body>
+</html>
