@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h2>Hồ sơ</h2>
+
+<p>Tài khoản đang đăng nhập</p>
+
+<button onclick="logout()">Đăng xuất</button>
+
+<script>
+function logout(){
+localStorage.removeItem("token");
+location.href="../Dangnhap.html";
+}
+</script>
+
+</body>
+</html>
