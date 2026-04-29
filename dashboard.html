@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>FASTGO Dashboard</title>
+
+<style>
+body{
+margin:0;
+font-family:Segoe UI;
+display:flex;
+height:100vh;
+background:#f4f6f9;
+}
+
+/* SIDEBAR */
+.sidebar{
+width:230px;
+background:#1f4fa3;
+color:white;
+padding:20px;
+display:flex;
+flex-direction:column;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+margin-bottom:20px;
+}
+
+.menu button{
+width:100%;
+padding:12px;
+margin:5px 0;
+border:none;
+background:transparent;
+color:white;
+text-align:left;
+cursor:pointer;
+border-radius:6px;
+}
+
+.menu button:hover{
+background:rgba(255,255,255,0.2);
+}
+
+/* MAIN */
+.main{
+flex:1;
+display:flex;
+flex-direction:column;
+}
+
+.header{
+height:60px;
+background:white;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+iframe{
+flex:1;
+border:none;
+}
+
+/* logout */
+.logout{
+background:red;
+color:white;
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+<div class="logo">🚚 FASTGO</div>
+
+<div class="menu">
+<button onclick="loadPage('modules/oders.html')">📦 Đơn hàng</button>
+<button onclick="loadPage('modules/drivers.html')">👨‍✈️ Tài xế</button>
+<button onclick="loadPage('modules/warehouse.html')">🏬 Kho</button>
+<button onclick="loadPage('modules/stats.html')">📊 Thống kê</button>
+<button onclick="loadPage('modules/profile.html')">👤 Hồ sơ</button>
+<button onclick="loadPage('modules/map.html')">🗺️ Bản đồ</button>
+</div>
+
+</div>
+
+<div class="main">
+
+<div class="header">
+<h3>Dashboard</h3>
+<button class="logout" onclick="logout()">Đăng xuất</button>
+</div>
+
+<iframe id="main"></iframe>
+
+</div>
+
+<script>
+if(!localStorage.getItem("token")){
+location.href="Dangnhap.html";
+}
+
+function loadPage(p){
+document.getElementById("main").src = p;
+}
+
+function logout(){
+localStorage.removeItem("token");
+location.href="Dangnhap.html";
+}
+
+loadPage('modules/oders.html');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>FASTGO</title>
+
+<style>
+body{
+margin:0;
+background: linear-gradient(to bottom, #d1d8e4, #1f4fa3);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+flex-direction:column;
+font-family:Arial;
+color:white;
+}
+
+/* LOGO */
+.logo{
+width:250px;
+animation:zoom 1s ease;
+}
+
+/* TEXT */
+h1{
+margin-top:10px;
+}
+
+/* LOADING BAR */
+.bar{
+width:250px;
+height:6px;
+background:rgba(255,255,255,0.3);
+border-radius:10px;
+margin-top:20px;
+overflow:hidden;
+}
+
+.progress{
+height:100%;
+width:0%;
+background:white;
+transition:0.2s;
+}
+
+/* % TEXT */
+.percent{
+margin-top:10px;
+font-size:14px;
+}
+
+/* ANIMATION */
+@keyframes zoom{
+from{transform:scale(0.5);opacity:0}
+to{transform:scale(1);opacity:1}
+}
+</style>
+</head>
+
+<body>
+
+<img src="logo.png" class="logo">
+<h1>FASTGO</h1>
+
+<div class="bar">
+<div class="progress" id="progress"></div>
+</div>
+
+<div class="percent" id="percent">0%</div>
+
+<script>
+
+let p = 0;
+
+let interval = setInterval(()=>{
+p+=5;
+
+document.getElementById("progress").style.width = p+"%";
+document.getElementById("percent").innerText = p+"%";
+
+if(p >= 100){
+clearInterval(interval);
+
+// 🔥 CHECK LOGIN SERVER
+checkLogin();
+
+}
+
+},100);
+
+
+/* 🔐 CHECK LOGIN */
+function checkLogin(){
+
+fetch("api/check_login.php")
+.then(res=>res.json())
+.then(data=>{
+
+if(data.status === "ok"){
+window.location.href = "dashboard.html";
+}else{
+window.location.href = "Dangnhap.html";
+}
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
